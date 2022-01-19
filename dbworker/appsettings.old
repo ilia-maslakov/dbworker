@@ -1,0 +1,26 @@
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=dbusrw;Trusted_Connection=True;"
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft": "Warning",
+      "Microsoft.Hosting.Lifetime": "Information"
+    }
+  },
+  "AllowedHosts": "*",
+
+
+  "RabbitMq": {
+    "BrokerName": "dbwork_broker",
+    "AutofacScopeName": "dbwork_autofac",
+    "QueueName": "dbwork_queue",
+    "RetryCount": "5",
+    "VirtualHost": "localhost",
+    "Username": "client2",
+    "Password": "client2",
+    "Host": "localhost",
+    "DispatchConsumersAsync": true
+  }
+}
