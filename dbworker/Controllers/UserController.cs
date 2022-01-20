@@ -7,22 +7,24 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using dbworker.Connection;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace dbworker.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class UserController : ControllerBase, IUserController
+    public class UserController : ControllerBase
     {
         private readonly ILogger<UserController> _logger;
-        private readonly DBworkerContext _context;
         private readonly UserValidator _validator;
+        private readonly UserRepository _db;
 
-        public UserController(ILogger<UserController> logger, DBworkerContext context)
+        public UserController(ILogger<UserController> logger, DBworkerContext db)
         {
             _logger = logger;
-            _context = context;
             _validator = new UserValidator();
+            _db = new UserRepository(logger, db, 1);
         }
 
         private bool isValidData(User user)
@@ -49,17 +51,7 @@ namespace dbworker.Controllers
             var u = new User { Name = name, Surname = surname, Patronymic = patronymic };
             if (isValidData(u))
             {
-                _context.Add(u);
-                try
-                {
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException e)
-                {
-                    _logger.LogInformation($"{DateTime.UtcNow.ToLongTimeString()} Error: {e.Message}");
-                    return BadRequest(e.Message);
-                }
-
+                await _db.Add(u);
             }
             else
             {
@@ -74,32 +66,15 @@ namespace dbworker.Controllers
             return Add(user.Name, user.Surname, user.Patronymic);
         }
         */
-        [HttpPut("{id}/{orgid}")]
-        public async Task<IActionResult> LinkUserOrg(int id, int orgid)
+
+        [HttpPut("LinkUserOrg/user={id}/org={orgid}")]
+        public IActionResult LinkUserOrg(int id, int orgid)
         {
-            var u = await _context.User.FindAsync(id);
-
-            if (u == null)
+            var res = _db.LinkUserOrg(id, orgid);
+            if (res != "OK")
             {
-                return NotFound($"user id = ({id}) not found");
+                return BadRequest(res);
             }
-            if (!OrgExists(orgid))
-            {
-                return NotFound($"org id = ({orgid}) not found");
-            }
-
-            u.Org = orgid;
-            _context.Entry(u).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException e)
-            {
-                return BadRequest($"Error LinkUserOrg [{e.Message}]");
-            }
-
             return Ok();
         }
 
@@ -107,22 +82,9 @@ namespace dbworker.Controllers
         [HttpGet]
         public IList<User> UserList(int? OrgId)
         {
-
-            int orgid = OrgId ?? 0;
-            _logger.LogInformation($"{DateTime.UtcNow.ToLongTimeString()} UserList({OrgId} -> {orgid})");
-            IQueryable<User> l = _context.User;
-
-            if (orgid > 0)
-            {
-                l = l.Where(p => p.Org == orgid);
-            }
-            _logger.LogInformation($"{DateTime.UtcNow.ToLongTimeString()} UserList retern {l.Count()} records");
-            return l.ToList();
+            return _db.GetUsers(0, 0);
         }
-        private bool OrgExists(int id)
-        {
-            return _context.Org.Any(e => e.Id == id);
-        }
+
 
     }
 }

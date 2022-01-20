@@ -14,14 +14,16 @@ namespace dbworker.Connection
 {
     public class UserReceiverService : BackgroundService
     {
+        //private readonly IUserRepository _db;
         private IServiceProvider _sp;
         private ConnectionFactory _factory;
         private IConnection _connection;
         private IModel _channel;
         private readonly ILogger<UserReceiverService> _logger;
 
-        public UserReceiverService(ILogger<UserReceiverService> logger, IServiceProvider sp)
+        public UserReceiverService(ILogger<UserReceiverService> logger, IServiceProvider sp )
         {
+            //_db = db;
             _sp = sp;
             _factory = new ConnectionFactory() { HostName = "localhost" };
             _connection = _factory.CreateConnection();
@@ -56,9 +58,11 @@ namespace dbworker.Connection
                         var opts = message.Split(";");
                         if (opts.Length == 4)
                         {
-                            var db = scope.ServiceProvider.GetRequiredService<IUserController>();
                             _logger.LogInformation($"{DateTime.UtcNow.ToLongTimeString()} try add User({opts[1]}, {opts[2]}, {opts[3]})");
-                            var u = db.Add(opts[1], opts[2], opts[3]);
+                            var u = new User { Name = opts[1], Surname = opts[2], Patronymic = opts[3] };
+
+                            var db = scope.ServiceProvider.GetRequiredService<IUserRepository<User>>();
+                            db.Add(u);
                         }
 
                     }

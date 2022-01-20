@@ -37,13 +37,14 @@ namespace dbworker
             string consrt = Configuration.GetConnectionString("DefaultConnection");
             services.AddSingleton<IConfiguration>(Configuration);
             services.AddDbContext<DBworkerContext>(o => o.UseSqlServer(consrt));
+            services.AddScoped<IUserRepository<User>, UserRepository> ();
+
             services.AddControllers()
                 .AddFluentValidation(s =>
                 {
                     s.RegisterValidatorsFromAssemblyContaining<Startup>();
                 });
 
-            services.AddScoped<IUserController, UserController>();
             services.AddHostedService<UserReceiverService>();
 
             services.AddSwaggerGen(c =>
