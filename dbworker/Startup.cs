@@ -36,7 +36,7 @@ namespace dbworker
 
             string consrt = Configuration.GetConnectionString("DefaultConnection");
             services.AddSingleton<IConfiguration>(Configuration);
-            services.AddDbContext<DBworkerContext>(o => o.UseSqlServer(consrt));
+            services.AddDbContext<DBworkerContext>(o => o.UseNpgsql(consrt));
             services.AddScoped<IUserRepository<User>, UserRepository> ();
 
             services.AddControllers()

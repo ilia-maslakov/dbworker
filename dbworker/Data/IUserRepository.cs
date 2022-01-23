@@ -9,10 +9,10 @@ namespace dbworker.Connection
         where T : class
     {
         public void Reconect();
-        Task<User> Add(User user);
+        User Add(User user);
         bool Delete(int id);
         User Find(int id);
-        IList<User> GetUsers(int page, int maxRecords);
+        IList<User> GetUsers();
         bool OrgExists(int orgid);
         bool UserExists(int id);
         string LinkUserOrg(int id, int orgid);

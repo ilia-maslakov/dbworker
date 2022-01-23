@@ -43,7 +43,7 @@ namespace dbworker.Controllers
         }
 
         [HttpPost("Add/{name},{surname},{patronymic}")]
-        public async Task<ActionResult<User>> Add(string name, string surname, string patronymic)
+        public ActionResult<User> Add(string name, string surname, string patronymic)
         {
 
             _logger.LogInformation($"{DateTime.UtcNow.ToLongTimeString()} Add({name})");
@@ -51,7 +51,7 @@ namespace dbworker.Controllers
             var u = new User { Name = name, Surname = surname, Patronymic = patronymic };
             if (isValidData(u))
             {
-                await _db.Add(u);
+                _db.Add(u);
             }
             else
             {
@@ -60,6 +60,7 @@ namespace dbworker.Controllers
             }
             return u;
         }
+
         /*
         public Task<ActionResult<User>> Add(User user)
         {
@@ -82,7 +83,7 @@ namespace dbworker.Controllers
         [HttpGet]
         public IList<User> UserList(int? OrgId)
         {
-            return _db.GetUsers(0, 0);
+            return _db.GetUsers();
         }
 
 

@@ -20,6 +20,14 @@ namespace dbworker.Connection
         private readonly bool needispose = false;
         private bool disposed = false;
 
+
+        public UserRepository(DBworkerContext context)
+        {
+            _context = context;
+            _validator = new UserValidator();
+            needispose = false;
+        }
+
         public UserRepository(ILogger<UserController> logger, DBworkerContext context, int rule)
         {
             _logger = logger;
@@ -30,15 +38,22 @@ namespace dbworker.Connection
         }
 
         [ActivatorUtilitiesConstructor]
-        public UserRepository(ILogger<UserController> logger)
+        public UserRepository(ILogger<UserController> logger, DBworkerContext context)
         {
             _logger = logger;
+            _context = context;
             _validator = new UserValidator();
-            _context = new DBworkerContext();
-            needispose = true;
+            needispose = false;
+            _logger.LogInformation($"{DateTime.UtcNow.ToLongTimeString()} post rule ({0})");
+            /*
+              _logger = logger;
+              _validator = new UserValidator();
+              _context = new DBworkerContext();
+              needispose = true;
+            */
         }
 
-    public void Reconect()
+        public void Reconect()
         {
             if (_context == null)
             {
@@ -46,7 +61,7 @@ namespace dbworker.Connection
             }
         }
 
-        public IList<User> GetUsers(int page, int maxRecords)
+        public IList<User> GetUsers()
         {
             int orgid = 0; //OrgId ?? 0;
             //_logger.LogInformation($"{DateTime.UtcNow.ToLongTimeString()} UserList({OrgId} -> {orgid})");
@@ -61,14 +76,14 @@ namespace dbworker.Connection
             return l.ToList<User>();
         }
 
-        public async Task<User> Add(User user)
+        public User Add(User user)
         {
             _logger.LogInformation($"{DateTime.UtcNow.ToLongTimeString()} Try Add user({user.Name}, {user.Surname}, {user.Patronymic})");
 
             _context.Add(user);
             try
             {
-                await _context.SaveChangesAsync();
+                _context.SaveChanges();
                 _logger.LogInformation($"{DateTime.UtcNow.ToLongTimeString()} Add success Id = {user.Id}");
 
             }
@@ -82,7 +97,20 @@ namespace dbworker.Connection
 
         public bool Delete(int id)
         {
-            return true;
+            var u = _context.User.Find(id);
+            if (u != null)
+            {
+                _context.User.Remove(u);
+                try
+                {
+                    _context.SaveChanges();
+                }
+                catch (DbUpdateConcurrencyException e)
+                {
+                    _logger.LogInformation($"{DateTime.UtcNow.ToLongTimeString()} Error Delete[{ e.Message}]");
+                }
+            }
+            return false;
         }
 
         public User Find(int id)
@@ -92,12 +120,22 @@ namespace dbworker.Connection
 
         public bool OrgExists(int orgid)
         {
-            return true;
+            var u = _context.Org.Find(orgid);
+            if (u != null)
+            {
+                return true;
+            }
+            return false;
         }
 
         public bool UserExists(int id)
         {
-            return true;
+            var u = _context.User.Find(id);
+            if (u != null)
+            {
+                return true;
+            }
+            return false;
         }
 
         public string LinkUserOrg(int id, int orgid)
