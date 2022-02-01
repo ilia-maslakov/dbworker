@@ -15,8 +15,8 @@ namespace dbworker.Connection
     public class UserRepository : IUserRepository<User>
     {
         private readonly ILogger<UserController> _logger;
-        private readonly UserValidator _validator;
-        private DBworkerContext _context;
+
+        private readonly DBworkerContext _context;
         private readonly bool needispose = false;
         private bool disposed = false;
 
@@ -24,15 +24,13 @@ namespace dbworker.Connection
         public UserRepository(DBworkerContext context)
         {
             _context = context;
-            _validator = new UserValidator();
             needispose = false;
         }
-
+        /*
         public UserRepository(ILogger<UserController> logger, DBworkerContext context, int rule)
         {
             _logger = logger;
             _context = context;
-            _validator = new UserValidator();
             needispose = false;
             _logger.LogInformation($"{DateTime.UtcNow.ToLongTimeString()} post rule ({rule})");
         }
@@ -42,29 +40,20 @@ namespace dbworker.Connection
         {
             _logger = logger;
             _context = context;
-            _validator = new UserValidator();
             needispose = false;
             _logger.LogInformation($"{DateTime.UtcNow.ToLongTimeString()} post rule ({0})");
-            /*
-              _logger = logger;
-              _validator = new UserValidator();
-              _context = new DBworkerContext();
-              needispose = true;
-            */
+            
+            //  _logger = logger;
+            //  _validator = new UserValidator();
+            //  _context = new DBworkerContext();
+            //  needispose = true;
+            
         }
-
-        public void Reconect()
-        {
-            if (_context == null)
-            {
-                _context = new DBworkerContext();
-            }
-        }
-
+        */
         public IList<User> GetUsers()
         {
             int orgid = 0; //OrgId ?? 0;
-            //_logger.LogInformation($"{DateTime.UtcNow.ToLongTimeString()} UserList({OrgId} -> {orgid})");
+ 
             IQueryable<User> l = _context.User;
 
             if (orgid > 0)

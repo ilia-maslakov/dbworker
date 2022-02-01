@@ -1,25 +1,12 @@
-using Microsoft.EntityFrameworkCore;
-using dbworker.Data.EF;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.OpenApi.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using FluentValidation.AspNetCore;
-using dbworker.Connection;
-using dbworker.Controllers;
+using dbworker.Configure;
 
 namespace dbworker
 {
+
     public class Startup
     {
         public Startup(IConfiguration configuration)
@@ -29,51 +16,20 @@ namespace dbworker
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
-
-            string consrt = Configuration.GetConnectionString("DefaultConnection");
-            services.AddSingleton<IConfiguration>(Configuration);
-            services.AddDbContext<DBworkerContext>(o => o.UseNpgsql(consrt));
-            services.AddScoped<IUserRepository<User>, UserRepository> ();
-
-            services.AddControllers()
-                .AddFluentValidation(s =>
-                {
-                    s.RegisterValidatorsFromAssemblyContaining<Startup>();
-                });
-
-            services.AddHostedService<UserReceiverService>();
-
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "dbworker", Version = "v1" });
-            });
+            ConfigureServicesBase.ConfigureServices(services);
+            ConfigureServicesDbContext.ConfigureServices(services, Configuration);
+            ConfigureServicesSwagger.ConfigureServices(services, Configuration);
+            ConfigureServicesControllers.ConfigureServices(services);
+            ConfigureServicesMassTransit.ConfigureServices(services, Configuration);
 
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, AutoMapper.IConfigurationProvider mapper)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "dbworker v1"));
-            }
-
-            app.UseHttpsRedirection();
-
-            app.UseRouting();
-
-            app.UseAuthorization();
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
+            ConfigureCommon.Configure(app, env, mapper);
+            ConfigureEndpoints.Configure(app);
         }
     }
 }

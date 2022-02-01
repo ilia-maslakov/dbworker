@@ -12,10 +12,6 @@ namespace dbworker.Data.EF
         public DbSet<User> User { get; set; }
         public DbSet<Org> Org { get; set; }
 
-        public DBworkerContext()
-        {
-
-        }
         public DBworkerContext(DbContextOptions<DBworkerContext> options) : base(options)
         {
             Database.EnsureCreated();
@@ -30,7 +26,7 @@ namespace dbworker.Data.EF
                 new User { Id = 3, Name = "Семен", Surname = "Семенов" },
                 new User { Id = 4, Name = "Николай", Surname = "Николаев" }
             );
-            /*
+            
             modelBuilder.HasAnnotation("dbusers", "0.01");
 
             modelBuilder.Entity<Org>(entity =>
@@ -47,7 +43,7 @@ namespace dbworker.Data.EF
                     .HasForeignKey(d => d.Org)
                     .HasConstraintName("FK_User_Org");
             });
-            */
+            
             //OnModelCreatingPartial(modelBuilder);
 
         }

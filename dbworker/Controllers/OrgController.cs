@@ -25,7 +25,7 @@ namespace dbworker.Controllers
             _validator = new OrgValidator();
         }
 
-        private bool isValidData(Org org)
+        private bool IsValidData(Org org)
         {
             var result = _validator.Validate(org);
             if (result.IsValid)
@@ -66,7 +66,7 @@ namespace dbworker.Controllers
             _logger.LogInformation($"{DateTime.UtcNow.ToLongTimeString()} PostOrg({name})");
 
             var o = new Org { Name = name };
-            _context.Add(o);
+            await _context.AddAsync(o);
             try
             {
                 await _context.SaveChangesAsync();
@@ -94,10 +94,11 @@ namespace dbworker.Controllers
 
             return NoContent();
         }
-
+        /*
         private bool OrgExists(int id)
         {
             return _context.Org.Any(e => e.Id == id);
         }
+        */
     }
 }

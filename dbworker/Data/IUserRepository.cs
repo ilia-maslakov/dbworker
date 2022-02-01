@@ -8,7 +8,6 @@ namespace dbworker.Connection
     public interface IUserRepository<T> : IDisposable
         where T : class
     {
-        public void Reconect();
         User Add(User user);
         bool Delete(int id);
         User Find(int id);
