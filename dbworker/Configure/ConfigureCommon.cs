@@ -21,8 +21,9 @@ namespace dbworker.Configure
         /// <param name="mapper"></param>
         public static void Configure(IApplicationBuilder app, IWebHostEnvironment env, AutoMapper.IConfigurationProvider mapper)
         {
+
             mapper.CompileMappings();
-            /*
+/*
             if (env.IsDevelopment())
             {
                 mapper.AssertConfigurationIsValid();
@@ -32,7 +33,7 @@ namespace dbworker.Configure
             {
                 mapper.CompileMappings();
             }
-            */
+*/
             app.UseDefaultFiles();
             app.UseStaticFiles(new StaticFileOptions
             {

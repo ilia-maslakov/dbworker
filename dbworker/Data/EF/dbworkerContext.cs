@@ -20,13 +20,13 @@ namespace dbworker.Data.EF
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
 
+
             modelBuilder.Entity<User>().HasData(
                 new User { Id = 1, Name = "Петр", Surname = "Петров" },
                 new User { Id = 2, Name = "Иван", Surname = "Иванов" },
                 new User { Id = 3, Name = "Семен", Surname = "Семенов" },
                 new User { Id = 4, Name = "Николай", Surname = "Николаев" }
             );
-            
             modelBuilder.HasAnnotation("dbusers", "0.01");
 
             modelBuilder.Entity<Org>(entity =>
@@ -42,6 +42,7 @@ namespace dbworker.Data.EF
                     .WithMany(p => p.Users)
                     .HasForeignKey(d => d.Org)
                     .HasConstraintName("FK_User_Org");
+
             });
             
             //OnModelCreatingPartial(modelBuilder);

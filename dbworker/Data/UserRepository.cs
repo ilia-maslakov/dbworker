@@ -14,42 +14,20 @@ namespace dbworker.Connection
 {
     public class UserRepository : IUserRepository<User>
     {
-        private readonly ILogger<UserController> _logger;
+        private readonly ILogger<UserRepository> _logger;
 
         private readonly DBworkerContext _context;
         private readonly bool needispose = false;
         private bool disposed = false;
 
 
-        public UserRepository(DBworkerContext context)
+        public UserRepository(ILogger<UserRepository> logger, DBworkerContext context)
         {
             _context = context;
-            needispose = false;
-        }
-        /*
-        public UserRepository(ILogger<UserController> logger, DBworkerContext context, int rule)
-        {
             _logger = logger;
-            _context = context;
             needispose = false;
-            _logger.LogInformation($"{DateTime.UtcNow.ToLongTimeString()} post rule ({rule})");
         }
 
-        [ActivatorUtilitiesConstructor]
-        public UserRepository(ILogger<UserController> logger, DBworkerContext context)
-        {
-            _logger = logger;
-            _context = context;
-            needispose = false;
-            _logger.LogInformation($"{DateTime.UtcNow.ToLongTimeString()} post rule ({0})");
-            
-            //  _logger = logger;
-            //  _validator = new UserValidator();
-            //  _context = new DBworkerContext();
-            //  needispose = true;
-            
-        }
-        */
         public IList<User> GetUsers()
         {
             int orgid = 0; //OrgId ?? 0;

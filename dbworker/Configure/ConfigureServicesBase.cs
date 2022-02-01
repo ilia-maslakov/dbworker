@@ -24,7 +24,7 @@ namespace dbworker.Configure
         public static void ConfigureServices(IServiceCollection services)
         {
             services.AddAutoMapper(typeof(Startup));
-            services.AddControllers();
+        //    services.AddControllers();
             services.AddMemoryCache();
             services.AddRouting();
             services.Configure<ApiBehaviorOptions>(options => { options.SuppressModelStateInvalidFilter = true; });

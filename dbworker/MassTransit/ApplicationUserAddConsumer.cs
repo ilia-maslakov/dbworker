@@ -8,7 +8,7 @@ using AutoMapper;
 
 namespace MassTransit
 {
-    public class ApplicationUserAddConsumer : IConsumer<IApplicationUserAdd>
+    public class ApplicationUserAddConsumer : IConsumer<ApplicationUserAdd>
     {
         private readonly ILogger<ApplicationUserAddConsumer> _logger;
         private readonly DBworkerContext _context;
@@ -20,12 +20,11 @@ namespace MassTransit
             _context = context;
             _mapper = mapper;
         }
-        public Task Consume(ConsumeContext<IApplicationUserAdd> context)
+        public Task Consume(ConsumeContext<ApplicationUserAdd> context)
         {
             _logger.LogError($"{context.Message}");
             var r = context.Message;
-
-            //var u = _mapper.Map<User>(r);
+            //var u = _mapper.Map<User>(r); //надо разобраться почему Exeption
 
             var u = new User { Name = r.Name, Surname = r.Surname, Patronymic = r.Patronymic, Email = r.Surname };
             _context.User.Add(u);

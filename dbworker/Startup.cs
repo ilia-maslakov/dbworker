@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using dbworker.Configure;
+using AutoMapper;
 
 namespace dbworker
 {
@@ -23,7 +24,6 @@ namespace dbworker
             ConfigureServicesSwagger.ConfigureServices(services, Configuration);
             ConfigureServicesControllers.ConfigureServices(services);
             ConfigureServicesMassTransit.ConfigureServices(services, Configuration);
-
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, AutoMapper.IConfigurationProvider mapper)
