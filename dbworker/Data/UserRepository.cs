@@ -52,7 +52,7 @@ namespace dbworker.Connection
               needispose = true;
             */
         }
-
+        /*
         public void Reconect()
         {
             if (_context == null)
@@ -60,7 +60,7 @@ namespace dbworker.Connection
                 _context = new DBworkerContext();
             }
         }
-
+        */
         public IList<User> GetUsers()
         {
             int orgid = 0; //OrgId ?? 0;

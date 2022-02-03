@@ -21,7 +21,7 @@ namespace dbworker.Connection
         private IModel _channel;
         private readonly ILogger<UserReceiverService> _logger;
 
-        public UserReceiverService(ILogger<UserReceiverService> logger, IServiceProvider sp )
+        public UserReceiverService(ILogger<UserReceiverService> logger, IServiceProvider sp)
         {
             //_db = db;
             _sp = sp;
