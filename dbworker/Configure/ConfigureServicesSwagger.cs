@@ -24,7 +24,7 @@ namespace dbworker.Configure
         /// </summary>
         /// <param name="services"></param>
         /// <param name="configuration"></param>
-        public static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
+        public static void ConfigureServices(IServiceCollection services)
         {
             services.AddSwaggerGen(options =>
             {

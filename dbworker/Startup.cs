@@ -21,7 +21,7 @@ namespace dbworker
         {
             ConfigureServicesBase.ConfigureServices(services);
             ConfigureServicesDbContext.ConfigureServices(services, Configuration);
-            ConfigureServicesSwagger.ConfigureServices(services, Configuration);
+            ConfigureServicesSwagger.ConfigureServices(services);
             ConfigureServicesControllers.ConfigureServices(services);
             ConfigureServicesMassTransit.ConfigureServices(services, Configuration);
         }
