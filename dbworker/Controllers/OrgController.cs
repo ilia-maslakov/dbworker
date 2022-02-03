@@ -1,12 +1,9 @@
 ﻿using dbworker.Data;
 using dbworker.Data.EF;
-using dbworker.Validators;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace dbworker.Controllers
@@ -16,50 +13,43 @@ namespace dbworker.Controllers
     public class OrgController : ControllerBase
     {
         private readonly ILogger<UnitOfWork> _logger;
-        private readonly DBworkerContext _context;
-        //private readonly OrgValidator _validator;
+        private readonly UnitOfWork _unitOfWork;
 
-        public OrgController(ILogger<UnitOfWork> logger, DBworkerContext context)
+        public OrgController(ILogger<UnitOfWork> logger, UnitOfWork unitOfWork)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
             _logger = logger;
-            // _validator = new OrgValidator();
         }
 
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Org>>> Get()
-        {
-            return await _context.Org.ToListAsync();
-        }
-
-        [HttpGet("{id}")]
+        [HttpGet("Get/{id}")]
         public async Task<ActionResult<Org>> Get(int id)
         {
-            var org = await _context.Org.FindAsync(id);
+            var o = await _unitOfWork.Orgs.GetAsync(id);
 
-            if (org == null)
+            if (o == null)
             {
                 return NotFound();
             }
 
-            return org;
+            return o;
         }
 
         [HttpPost("Add/{name}")]
         public async Task<ActionResult<Org>> Add(string name)
         {
 
-            _logger.LogInformation($"{DateTime.UtcNow.ToLongTimeString()} PostOrg({name})");
+
+            _logger.LogInformation($"{DateTime.UtcNow.ToLongTimeString()} Add Org({name})");
 
             var o = new Org { Name = name };
-            await _context.AddAsync(o);
+            await _unitOfWork.Orgs.AddAsync(o);
             try
             {
-                await _context.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException e)
             {
-                _logger.LogInformation($"{DateTime.UtcNow.ToLongTimeString()} Error: {e.Message}");
+                _logger.LogInformation($"{DateTime.UtcNow.ToLongTimeString()} Error Add Org: {e.Message}");
             }
 
             return o;
@@ -69,14 +59,14 @@ namespace dbworker.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteOrg(int id)
         {
-            var org = await _context.Org.FindAsync(id);
+            var org = await _unitOfWork.Orgs.GetAsync(id);
             if (org == null)
             {
                 return NotFound();
             }
 
-            _context.Org.Remove(org);
-            await _context.SaveChangesAsync();
+            _unitOfWork.Orgs.Remove(org);
+            await _unitOfWork.SaveChangesAsync();
 
             return NoContent();
         }

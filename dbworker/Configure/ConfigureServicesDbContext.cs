@@ -1,4 +1,5 @@
-﻿using dbworker.Data.EF;
+﻿using dbworker.Data;
+using dbworker.Data.EF;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,6 +19,9 @@ namespace dbworker.Configure
         {
             string consrt = configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<DBworkerContext>(o => o.UseNpgsql(consrt));
+            services.AddScoped<UnitOfWork>();
+            services.AddScoped<UserRepository>();
+            services.AddScoped<OrgRepository>();
         }
     }
 }

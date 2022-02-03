@@ -37,6 +37,19 @@ namespace dbworker.Data
             return _context.User.Where(predicate).ToList();
         }
 
+        public IEnumerable<User> Get(int page = 1, int pageSize = 20)
+        {
+            try
+            {
+                return _context.User.OrderBy(i => i.Id).Skip(pageSize * page).Take(pageSize).ToList();
+            }
+            catch (Exception e)
+            {
+                _logger.LogInformation($"{DateTime.UtcNow.ToLongTimeString()} Error: {e.Message}");
+                return null;
+            }
+        }
+
         public ValueTask<User> GetAsync(int id)
         {
             return _context.User.FindAsync(id);
@@ -85,6 +98,7 @@ namespace dbworker.Data
                 _context.User.Remove(o);
             }
         }
+
     }
 }
 

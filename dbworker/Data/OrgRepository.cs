@@ -30,6 +30,19 @@ namespace dbworker.Data
             return _context.Org.ToList();
         }
 
+        public IEnumerable<Org> Get(int page = 1, int pageSize = 20)
+        {
+            try
+            {
+                return _context.Org.OrderBy(i => i.Id).Skip(pageSize * page).Take(pageSize).ToList();
+            }
+            catch (Exception e)
+            {
+                _logger.LogInformation($"{DateTime.UtcNow.ToLongTimeString()} Error: {e.Message}");
+                return null;
+            }
+        }
+
         IEnumerable<Org> IRepository<Org>.Get(Func<Org, bool> predicate)
         {
             return _context.Org.Where(predicate).ToList();

@@ -20,9 +20,9 @@ namespace dbworker.Controllers
         private readonly UnitOfWork _unitOfWork;
         private readonly ILogger<UserController> _logger;
 
-        public UserController(ILogger<UserController> logger, DBworkerContext db)
+        public UserController(ILogger<UserController> logger, UnitOfWork unitOfWork)
         {
-            _unitOfWork = new UnitOfWork(db);
+            _unitOfWork = unitOfWork;
             _validator = new UserValidator();
             _logger = logger;
         }
@@ -60,6 +60,21 @@ namespace dbworker.Controllers
             }
 
             return user.ToList();
+        }
+
+        [HttpGet("Page/{Page}")]
+        public ActionResult<IEnumerable<User>> GetPage(int? Page, int? PageSize = 20)
+        {
+            int page = Page ?? 1;
+            int psize = PageSize ?? 20;
+
+            var u = _unitOfWork.Users.Get(page, psize);
+            if (u == null)
+            {
+                return NotFound();
+            }
+
+            return u.ToList();
         }
 
         [HttpPost("Add/{name},{surname},{patronymic},{email}")]
