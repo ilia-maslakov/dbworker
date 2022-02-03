@@ -1,4 +1,5 @@
-﻿using dbworker.Data.EF;
+﻿using dbworker.Data;
+using dbworker.Data.EF;
 using dbworker.Validators;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -15,94 +16,97 @@ namespace dbworker.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly ILogger<UserController> _logger;
-        private readonly DBworkerContext _db;
         private readonly UserValidator _validator;
+        private readonly UnitOfWork _unitOfWork;
+        private readonly ILogger<UserController> _logger;
 
         public UserController(ILogger<UserController> logger, DBworkerContext db)
         {
-            _logger = logger;
-            _db = db;
+            _unitOfWork = new UnitOfWork(db);
             _validator = new UserValidator();
+            _logger = logger;
         }
         
-        private bool IsValidData(User user)
-        {
-            var result = _validator.Validate(user);
-            if (result.IsValid)
-            {
-                return true;
-            }
-
-            foreach (var error in result.Errors)
-            {
-                _logger.LogInformation($"{DateTime.UtcNow.ToLongTimeString()} User validation errors: {error.ErrorMessage}");
-            }
-            return false;
-        }
-
-        [HttpGet("{id}")]
+        [HttpGet("Get/{id}")]
         public async Task<ActionResult<User>> Get(int id)
         {
-            var org = await _db.User.FindAsync(id);
+            var user = await _unitOfWork.Users.GetAsync(id);
 
-            if (org == null)
+            if (user == null)
             {
                 return NotFound();
             }
 
-            return org;
+            return user;
+        }
+
+        [HttpGet("org/{orgid?}")]
+        public ActionResult<IEnumerable<User>> GetAll(int? orgid)
+        {
+            IEnumerable<User> user;
+
+            if ((orgid ?? 0) != 0)
+            {
+                user = _unitOfWork.Users.Get(p => p.Org == orgid);
+            }
+            else
+            {
+                user = _unitOfWork.Users.Get();
+            }
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return user.ToList();
         }
 
         [HttpPost("Add/{name},{surname},{patronymic},{email}")]
         public async Task<ActionResult<User>> Add(string name, string surname, string patronymic, string email)
         {
-
-            _logger.LogInformation($"{DateTime.UtcNow.ToLongTimeString()} Add({name})");
-
             var u = new User { Name = name, Surname = surname, Patronymic = patronymic, Email = email };
-            if (IsValidData(u))
+            if (IsValid(u))
             {
-                _db.Add(u);
+                _unitOfWork.Users.Add(u);
                 try
                 {
-                    await _db.SaveChangesAsync();
+                    await _unitOfWork.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException e)
                 {
-                    _logger.LogInformation($"{DateTime.UtcNow.ToLongTimeString()} Error: {e.Message}");
                     return BadRequest($"Error: {e.Message}");
                 }
             }
             else
             {
-                _logger.LogInformation($"{DateTime.UtcNow.ToLongTimeString()} Adding aborted!!!");
                 return BadRequest("Incorect params");
             }
             return u;
         }
 
+
         [HttpPut("LinkUserOrg/user={id}/org={orgid}")]
         public async Task<ActionResult<User>> LinkUserOrg(int id, int orgid)
         {
-            var u = await _db.User.FindAsync(id);
+            var u = await _unitOfWork.Users.GetAsync(id);
 
             if (u == null)
             {
-                return BadRequest($"user id = ({id}) not found"); 
+                return BadRequest($"user id = ({id}) not found");
             }
 
-            if (!OrgExists(orgid))
+            if (_unitOfWork.Orgs.Get(orgid) == null)
             {
                 return BadRequest($"org id = ({orgid}) not found");
             }
 
             u.Org = orgid;
-            _db.Entry(u).State = EntityState.Modified;
+            _unitOfWork.Users.Update(u);
 
             try
             {
-                await _db.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException e)
             {
@@ -110,44 +114,23 @@ namespace dbworker.Controllers
             }
             return Ok();
         }
-
-        [HttpGet("{orgid}")]
-        public ActionResult<IEnumerable<User>> UserList(int? OrgId)
+        
+        private bool IsValid(User user)
         {
-            int org = OrgId ?? 0;
-
-            IQueryable<User> l = _db.User;
-
-            if (org > 0)
-            {
-                l = l.Where(p => p.Org == org);
-            }
-            _logger.LogInformation($"{DateTime.UtcNow.ToLongTimeString()} UserList retern {l.Count()} records");
-
-            return l.ToList();
-        }
-
-        private bool OrgExists(int orgid)
-        {
-            var u = _db.Org.Find(orgid);
-            if (u != null)
+            var result = _validator.Validate(user);
+            if (result.IsValid)
             {
                 return true;
             }
-            return false;
-        }
-
-        private bool UserExists(int id)
-        {
-            var u = _db.User.Find(id);
-            if (u != null)
+            
+            foreach (var error in result.Errors)
             {
-                return true;
+                _logger.LogInformation($"{DateTime.UtcNow.ToLongTimeString()} User validation errors: {error.ErrorMessage}");
             }
+            
             return false;
         }
 
-    
 
     }
 }

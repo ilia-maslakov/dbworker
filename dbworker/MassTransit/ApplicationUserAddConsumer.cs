@@ -12,13 +12,13 @@ namespace MassTransit
     {
         private readonly ILogger<ApplicationUserAddConsumer> _logger;
         private readonly DBworkerContext _context;
-        private readonly IMapper _mapper;
+        //private readonly IMapper _mapper;
 
         public ApplicationUserAddConsumer(ILogger<ApplicationUserAddConsumer> logger, DBworkerContext context, IMapper mapper)
         {
             _logger = logger;
             _context = context;
-            _mapper = mapper;
+            //_mapper = mapper;
         }
         public Task Consume(ConsumeContext<ApplicationUserAdd> context)
         {

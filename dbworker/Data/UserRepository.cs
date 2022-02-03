@@ -1,37 +1,98 @@
 ﻿using dbworker.Data.EF;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using dbworker.Controllers;
 using Microsoft.Extensions.Logging;
-using dbworker.Validators;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
-namespace dbworker.Connection
+namespace dbworker.Data
 {
-    public class UserRepository : IUserRepository<User>
+    public class UserRepository : IRepository<User>
     {
-        private readonly ILogger<UserRepository> _logger;
-
+        private readonly ILogger<UnitOfWork> _logger;
         private readonly DBworkerContext _context;
-        private readonly bool needispose = false;
-        private bool disposed = false;
 
-
-        public UserRepository(ILogger<UserRepository> logger, DBworkerContext context)
+        public UserRepository(DBworkerContext context)
         {
             _context = context;
-            _logger = logger;
-            needispose = false;
+            _logger = LoggerFactory.Create(options => { }).CreateLogger<UnitOfWork>();
         }
 
+
+        User IRepository<User>.Get(int id)
+        {
+            return _context.User.Find(id);
+        }
+
+        IEnumerable<User> IRepository<User>.Get()
+        {
+            return _context.User.ToList();
+        }
+
+        IEnumerable<User> IRepository<User>.Get(Func<User, bool> predicate)
+        {
+            return _context.User.Where(predicate).ToList();
+        }
+
+        public ValueTask<User> GetAsync(int id)
+        {
+            return _context.User.FindAsync(id);
+        }
+
+        Task<List<User>> IRepository<User>.GetAsync()
+        {
+            return _context.User.ToListAsync();
+        }
+
+        User IRepository<User>.Add(User item)
+        {
+            _logger.LogInformation($"{DateTime.UtcNow.ToLongTimeString()} Try Add user({item})");
+            _context.Add(item);
+            return item;
+        }
+
+        ValueTask<EntityEntry<User>> IRepository<User>.AddAsync(User item)
+        {
+            return _context.AddAsync(item);
+        }
+
+        void IRepository<User>.Update(User item)
+        {
+            _context.Entry(item).State = EntityState.Modified;
+        }
+
+        void IRepository<User>.Remove(int id)
+        {
+            User u = _context.User.Find(id);
+            if (u != null)
+            {
+                _context.User.Remove(u);
+            }
+        }
+
+        void IRepository<User>.Remove(User item)
+        {
+            _context.User.Remove(item);
+        }
+
+        void IRepository<User>.Remove(Func<User, bool> predicate)
+        {
+            foreach (User o in _context.User.Where(predicate).ToList())
+            {
+                _context.User.Remove(o);
+            }
+        }
+    }
+}
+
+/*
         public IList<User> GetUsers()
         {
             int orgid = 0; //OrgId ?? 0;
- 
+
             IQueryable<User> l = _context.User;
 
             if (orgid > 0)
@@ -39,7 +100,7 @@ namespace dbworker.Connection
                 l = l.Where(p => p.Org == orgid);
             }
             _logger.LogInformation($"{DateTime.UtcNow.ToLongTimeString()} UserList retern {l.Count()} records");
-            
+
             return l.ToList<User>();
         }
 
@@ -132,25 +193,26 @@ namespace dbworker.Connection
             return "OK";
         }
 
-
-        public virtual void Dispose(bool disposing)
+public virtual void Dispose(bool disposing)
+{
+    if (needispose) { 
+        if (!this.disposed)
         {
-            if (needispose) { 
-                if (!this.disposed)
-                {
-                    if (disposing)
-                    {
-                        _context.Dispose();
-                    }
-                }
-                this.disposed = true;
+            if (disposing)
+            {
+                _context.Dispose();
             }
         }
+        this.disposed = true;
+    }
+}
 
-        public void Dispose()
+public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+
     }
 }
+*/

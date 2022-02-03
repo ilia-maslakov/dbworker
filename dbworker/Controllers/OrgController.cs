@@ -1,4 +1,5 @@
-﻿using dbworker.Data.EF;
+﻿using dbworker.Data;
+using dbworker.Data.EF;
 using dbworker.Validators;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,30 +15,15 @@ namespace dbworker.Controllers
     [ApiController]
     public class OrgController : ControllerBase
     {
-        private readonly ILogger<OrgController> _logger;
+        private readonly ILogger<UnitOfWork> _logger;
         private readonly DBworkerContext _context;
-        private readonly OrgValidator _validator;
+        //private readonly OrgValidator _validator;
 
-        public OrgController(ILogger<OrgController> logger, DBworkerContext context)
+        public OrgController(ILogger<UnitOfWork> logger, DBworkerContext context)
         {
             _context = context;
             _logger = logger;
-            _validator = new OrgValidator();
-        }
-
-        private bool IsValidData(Org org)
-        {
-            var result = _validator.Validate(org);
-            if (result.IsValid)
-            {
-                return true;
-            }
-
-            foreach (var error in result.Errors)
-            {
-                _logger.LogInformation($"{DateTime.UtcNow.ToLongTimeString()} Org validation errors: {error.ErrorMessage}");
-            }
-            return false;
+            // _validator = new OrgValidator();
         }
 
         [HttpGet]
@@ -94,11 +80,5 @@ namespace dbworker.Controllers
 
             return NoContent();
         }
-        /*
-        private bool OrgExists(int id)
-        {
-            return _context.Org.Any(e => e.Id == id);
-        }
-        */
     }
 }
